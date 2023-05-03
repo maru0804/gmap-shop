@@ -1,6 +1,21 @@
 import requests
 import time
 import configparser
+from collections import namedtuple
+
+def init_conf():
+    Conf = namedtuple('Conf', ['Key', 'Keyword', 'Location', 'Url', 'Num_results', 'Detail_url'])
+    config = configparser.ConfigParser()
+    config.read('conf.ini')
+
+    Key = config.get('api-settings', 'apiKey') # ここにAPIキーを入力
+    Keyword = config.get('serach-settings', 'keyword')  # 検索するキーワード
+    Location = config.get('serach-settings', 'location')  # 天神の緯度と経度
+    Url = config.get('serach-settings', 'url')  # Google Places APIのURL
+    Num_results = int(config.get('serach-settings', 'num_results'))  # 検索結果の数
+    Detail_url = config.get('serach-settings', 'detail_url')  # Google Places APIのURL
+
+    return Conf(Key, Keyword, Location, Url, Num_results, Detail_url)
 
 def search_places(base_url, api_key, keyword, location, radius=1000, num_results=10):
     results = []
@@ -40,21 +55,14 @@ def get_place_details(api_key, place_id, detail_url):
     return response.json()["result"]
 
 def main():
-    config = configparser.ConfigParser()
-    config.read('conf.ini')
-    api_key = config.get('api-settings', 'apiKey') # ここにAPIキーを入力
-    keyword = config.get('serach-settings', 'keyword')  # 検索するキーワード
-    location = config.get('serach-settings', 'location')  # 天神の緯度と経度
-    base_url = config.get('serach-settings', 'url')  # Google Places APIのURL
-    num_results = int(config.get('serach-settings', 'num_results'))  # 検索結果の数
-    detail_url = config.get('serach-settings', 'detail_url')  # Google Places APIのURL
+    config = init_conf()
 
-    top_50_places = search_places(base_url, api_key, keyword, location, num_results=num_results)
+    top_50_places = search_places(config.Url, config.Key, config.Keyword, config.Location, num_results=config.Num_results)
     file = open('result.txt', 'w')   
     file_limit = open('result_limit.txt', 'w')    
     for i, place in enumerate(top_50_places):
         reviews_count = place.get('user_ratings_total', 'N/A')
-        details = get_place_details(api_key, place["place_id"], detail_url)
+        details = get_place_details(config.Key, place["place_id"], config.Detail_url)
         phone_number = details.get("formatted_phone_number", "N/A")
 
         # 結果の出力
