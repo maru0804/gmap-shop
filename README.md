@@ -39,7 +39,8 @@ apiKey = "your api key"
 python3 main.py
 ```
 4. 結果の確認
-result.txtと標準出力に結果が出力される
+result.txt:全ての出力結果
+result_limit:口コミが20件未満の結果
 
 # 参考
 - [20件以上の検索結果を取得する](https://developers.google.com/maps/documentation/places/web-service/search?hl=ja)
